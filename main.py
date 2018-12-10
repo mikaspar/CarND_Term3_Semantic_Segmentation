@@ -56,11 +56,14 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     :param num_classes: Number of classes to classify
     :return: The Tensor for the last layer of output
     """
+    
+    #  Added layers are being trained. Weights and biases of the loaded VGG stay 'frozen'. 
     vgg_layer7_out = tf.stop_gradient(vgg_layer7_out)
     vgg_layer4_out = tf.stop_gradient(vgg_layer4_out)
     vgg_layer3_out = tf.stop_gradient(vgg_layer3_out)
 
     with tf.variable_scope("trainable_layers"):
+
         layer7a_out = tf.layers.conv2d(vgg_layer7_out, num_classes, 1, padding= 'same', kernel_initializer= tf.random_normal_initializer(stddev=0.001),kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3),name='l1')
     # upsample
         layer4a_in1 = tf.layers.conv2d_transpose(layer7a_out, num_classes, 4, strides= (2, 2), padding= 'same', kernel_initializer= tf.random_normal_initializer(stddev=0.001), kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3),name='l2')

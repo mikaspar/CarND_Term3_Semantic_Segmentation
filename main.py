@@ -60,7 +60,7 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     vgg_layer4_out = tf.stop_gradient(vgg_layer4_out)
     vgg_layer3_out = tf.stop_gradient(vgg_layer3_out)
 
-    with tf.variable_scope("trainable_section"):
+    with tf.variable_scope("trainable_layers"):
         layer7a_out = tf.layers.conv2d(vgg_layer7_out, num_classes, 1, padding= 'same', kernel_initializer= tf.random_normal_initializer(stddev=0.001),kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3),name='l1')
     # upsample
         layer4a_in1 = tf.layers.conv2d_transpose(layer7a_out, num_classes, 4, strides= (2, 2), padding= 'same', kernel_initializer= tf.random_normal_initializer(stddev=0.001), kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3),name='l2')
@@ -88,7 +88,7 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     # upsample    
         nn_last_layer = tf.layers.conv2d_transpose(nn_prelast_layer, num_classes, 4, strides= (2, 2), padding= 'same', kernel_initializer= tf.random_normal_initializer(stddev=0.001), kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))    
 
-        trainable_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, "trainable_section")
+        trainable_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, "trainable_layers")
     return nn_last_layer
 
 tests.test_layers(layers)
@@ -114,7 +114,7 @@ def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
     
     optimizer = tf.train.AdamOptimizer(learning_rate= learning_rate)
     # Apply optimizer to the loss function.
-    trainable_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, "trainable_section")
+    trainable_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, "trainable_layers")
     
     if(len(trainable_vars)==0) :
         train_op = optimizer.minimize(cross_entropy_loss)
@@ -142,7 +142,7 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
     :param learning_rate: TF Placeholder for learning rate
     """
     # TODO: Implement function
-    trainable_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, "trainable_section") 
+    trainable_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, "trainable_layers") 
     trainable_variable_initializers = [var.initializer for var in trainable_vars]
     sess.run(trainable_variable_initializers)
     sess.run(tf.variables_initializer(optimizer.variables()))
